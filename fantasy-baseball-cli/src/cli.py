@@ -1,17 +1,25 @@
 import argparse
-from utils import fetch_player_stats
+from .utils import fetch_player_stats
 
 def create_cli_parser():
     """Create and return the argument parser for the CLI tool."""
-    parser = argparse.ArgumentParser(description="Retrieve MLB player statistics.")
-    parser.add_argument('player_id', type=int, help='The ID of the player to retrieve statistics for.')
+    parser = argparse.ArgumentParser(
+        description="Retrieve MLB statistics.",
+        add_help=True
+    )
+    parser.add_argument(
+        '--player-id',
+        type=int,
+        required=True,
+        help='The ID of the player to retrieve statistics for.'
+    )
     return parser
 
 def main():
-    """Parse CLI arguments and print MLB player statistics."""
+    """Parse CLI arguments and print MLB statistics."""
     parser = create_cli_parser()
     args = parser.parse_args()
-    
+
     try:
         stats = fetch_player_stats(args.player_id)
         print(stats)
