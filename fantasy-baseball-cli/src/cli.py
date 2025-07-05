@@ -1,5 +1,6 @@
 import argparse
 from .utils import fetch_player_stats
+import statsapi
 
 def create_cli_parser():
     """Create and return the argument parser for the CLI tool."""
@@ -8,10 +9,10 @@ def create_cli_parser():
         add_help=True
     )
     parser.add_argument(
-        '--player-id',
-        type=int,
+        '--player-name',
+        type=str,
         required=True,
-        help='The ID of the player to retrieve statistics for.'
+        help='The name of the player to retrieve statistics for (e.g., "Mike Trout").'
     )
     return parser
 
@@ -21,7 +22,12 @@ def main():
     args = parser.parse_args()
 
     try:
-        stats = fetch_player_stats(args.player_id)
+        players = statsapi.lookup_player(args.player_name)
+        if not players:
+            print(f"No player found with name '{args.player_name}'.")
+            return
+        player_id = players[0]['id']
+        stats = fetch_player_stats(player_id)
         print(stats)
     except Exception as e:
         print(f"Error retrieving stats: {e}")
