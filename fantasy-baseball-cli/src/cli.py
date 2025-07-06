@@ -1,5 +1,6 @@
 import argparse
-from .utils import fetch_player_stats, lookup_player_id, compare_players
+from .utils import fetch_player_stats, lookup_player_id
+from .commands import compare_players
 
 def create_cli_parser():
     """Create and return the argument parser for the CLI tool."""
@@ -9,15 +10,26 @@ def create_cli_parser():
     )
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
-        '--player-name',
+        '--player',
         type=str,
-        help='Get stats of a player by name (e.g., --player-name "Mike Trout").'
+        help='Get stats of a player by name (e.g., --player "Mike Trout").'
     )
     group.add_argument(
         '--compare',
         nargs=2,
         metavar=('PLAYER1', 'PLAYER2'),
         help='Compare two players by name (e.g., --compare "Mike Trout" "Shohei Ohtani").'
+    )
+    stat_group = parser.add_mutually_exclusive_group(required=False)
+    stat_group.add_argument(
+        '--season',
+        type=str,
+        help='Optionally specify a season/year for stats (e.g., --season 2021).'
+    )
+    stat_group.add_argument(
+        '--career',
+        action='store_true',
+        help='Show career stats instead of season stats.'
     )
     return parser
 
@@ -27,10 +39,13 @@ def main():
     args = parser.parse_args()
 
     try:
-        if args.player_name:
-            player_id = lookup_player_id(args.player_name)
+        if args.player:
+            player_id = lookup_player_id(args.player)
             if player_id:
-                stats = fetch_player_stats(player_id)
+                if args.career:
+                    stats = fetch_player_stats(player_id, type="career")
+                else:
+                    stats = fetch_player_stats(player_id, season=args.season)
                 print(stats)
         elif args.compare:
             player_id_1 = lookup_player_id(args.compare[0])
