@@ -21,6 +21,7 @@ python src/main.py [flags]
 ## Commands
 
 - `--player <player_name>`: Retrieve statistics for a specific player.
+- `--compare <player_name> <player_name>`: Compare two specific players.
 - `--team <team_name>`: Retrieve statistics for all players on a specific team.
 - `--help`: Show help information about the available commands.
 
