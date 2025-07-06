@@ -9,6 +9,4 @@ build/
 dist/
 *.sqlite3
 .DS_Store
-test.py
-test_*.py
-*_test.py
+fantasy_team.db
