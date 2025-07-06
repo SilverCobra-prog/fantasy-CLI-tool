@@ -1,27 +1,28 @@
-import statsapi
+import requests
 
 def lookup_player_id(name):
-    """Lookup a player ID by name using statsapi."""
-    players = statsapi.lookup_player(name)
-    if not players:
-        print(f"No player found with name '{name}'.")
-        return None
-    if len(players) > 1:
-        print(f"Multiple players found for '{name}', using the first match: {players[0]['fullName']}")
-    return players[0]['id']
+    """Get a player's name from their MLB player ID."""
+    url = "https://statsapi.mlb.com/api/v1/people/search"
+    params = {"names": [name]} 
+    res = requests.get(url, params=params)
+    data = res.json()
+    if "people" in data and data["people"]:
+        return data["people"][0]["id"]
+    return None
+
 
 def lookup_player_name(id):
-    """Lookup a player's full name by name using statsapi."""
-    players = statsapi.lookup_player(id)
-    if not players:
-        print(f"No player found with id '{id}'.")
-        return None
-    if len(players) > 1:
-        print(f"Multiple players found for '{id}', using the first match: {players[0]['fullName']}")
-    return players[0]['fullName']
+    """Get a player's MLB player ID from their name."""
+    url = "https://statsapi.mlb.com/api/v1/people/search"
+    params = {"personIds": [id]} 
+    res = requests.get(url, params=params)
+    data = res.json()
+    if "people" in data and data["people"]:
+        return data["people"][0]["fullName"]
+    return None
 
 def format_player_stats(player_dict):
-    """Nicely format player stats from the statsapi.get('people', ...)['people'][0] dict."""
+    """Nicely format player stats."""
     lines = []
     lines.append(f"{player_dict['fullName']} ({player_dict['primaryPosition']['name']})")
     lines.append("")
@@ -46,21 +47,38 @@ def fetch_player_stats(player_id, season=None, type="season"):
     """
     try:
         if season:
-            stats = statsapi.get(
-                'people',
-                {
-                    'personIds': player_id,
-                    'season': season,
-                    'hydrate': f'stats(group=[hitting,pitching,fielding],type=season,season={season})'
-                }
-            )['people'][0]
-            return format_player_stats(stats)
+            url = f"https://statsapi.mlb.com/api/v1/people/{player_id}"
+            params = {
+                "hydrate": f"stats(group=[hitting,pitching,fielding],type=season,season={season})",
+                "season": season
+            }
+            res = requests.get(url, params=params)
+            if res.status_code != 200:
+                print(f"API Error: {res.status_code} - {res.text}")
+                return None
+            data = res.json()
+            if "people" in data and data["people"]:
+                return format_player_stats(data["people"][0])
+            else:
+                print("No player data found.")
+                return None
         else:
-            return statsapi.player_stats(player_id, type=type)
+            url = f"https://statsapi.mlb.com/api/v1/people/{player_id}"
+            params = {
+                "hydrate": "stats(group=[hitting,pitching,fielding],type=career)"
+            }
+            res = requests.get(url, params=params)
+            if res.status_code != 200:
+                print(f"API Error: {res.status_code} - {res.text}")
+                return None
+            data = res.json()
+            if "people" in data and data["people"]:
+                return format_player_stats(data["people"][0])
+            else:
+                print("No player data found.")
     except Exception as e:
         print(f"Error fetching stats for player ID {player_id}: {e}")
         return None    
-    
     
 def parse_stats(stats_str):
     """Parse all key-value pairs in the stats string into a dictionary."""
