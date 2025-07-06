@@ -1,11 +1,12 @@
 import argparse
 from .utils import fetch_player_stats, lookup_player_id
 from .commands import compare_players
+from .fantasy_db import init_fantasy_db, add_player_to_team, remove_player_from_team, list_fantasy_team
 
 def create_cli_parser():
     """Create and return the argument parser for the CLI tool."""
     parser = argparse.ArgumentParser(
-        description="Retrieve or compare MLB player statistics.",
+        description="Retrieve or compare MLB player statistics, or manage your fantasy team.",
         add_help=True
     )
     group = parser.add_mutually_exclusive_group(required=True)
@@ -19,6 +20,23 @@ def create_cli_parser():
         nargs=2,
         metavar=('PLAYER1', 'PLAYER2'),
         help='Compare two players by name (e.g., --compare "Mike Trout" "Shohei Ohtani").'
+    )
+    group.add_argument(
+        '--fantasy-add',
+        nargs=2,
+        metavar=('USER', 'PLAYER'),
+        help='Add a player to a user\'s fantasy team (e.g., --fantasy-add sumukh "Mike Trout").'
+    )
+    group.add_argument(
+        '--fantasy-remove',
+        nargs=2,
+        metavar=('USER', 'PLAYER'),
+        help='Remove a player from a user\'s fantasy team (e.g., --fantasy-remove sumukh "Mike Trout").'
+    )
+    group.add_argument(
+        '--fantasy-list',
+        metavar='USER',
+        help='List all players on a user\'s fantasy team (e.g., --fantasy-list sumukh).'
     )
     stat_group = parser.add_mutually_exclusive_group(required=False)
     stat_group.add_argument(
@@ -34,11 +52,12 @@ def create_cli_parser():
     return parser
 
 def main():
-    """Parse CLI arguments and print MLB statistics or compare two players."""
+    """Parse CLI arguments and print MLB statistics or manage fantasy teams."""
     parser = create_cli_parser()
     args = parser.parse_args()
 
     try:
+        init_fantasy_db()
         if args.player:
             player_id = lookup_player_id(args.player)
             if player_id:
@@ -57,9 +76,34 @@ def main():
                     season=args.season,
                     career=args.career
                 )
-                print(comparison)    
+                print(comparison)
+        elif args.fantasy_add:
+            user, player_name = args.fantasy_add
+            player_id = lookup_player_id(player_name)
+            if player_id:
+                add_player_to_team(user, player_id, player_name)
+                print(f"Added {player_name} (ID: {player_id}) to {user}'s fantasy team.")
+            else:
+                print(f"Player '{player_name}' not found.")
+        elif args.fantasy_remove:
+            user, player_name = args.fantasy_remove
+            player_id = lookup_player_id(player_name)
+            if player_id:
+                remove_player_from_team(user, player_id)
+                print(f"Removed {player_name} (ID: {player_id}) from {user}'s fantasy team.")
+            else:
+                print(f"Player '{player_name}' not found.")
+        elif args.fantasy_list:
+            user = args.fantasy_list
+            team = list_fantasy_team(user)
+            if team:
+                print(f"{user}'s fantasy team:")
+                for pid, pname in team:
+                    print(f"{pname} (ID: {pid})")
+            else:
+                print(f"{user} has no players on their fantasy team.")
     except Exception as e:
-        print(f"Error retrieving stats: {e}")
+        print(f"Error: {e}")
 
 if __name__ == "__main__":
     main()
