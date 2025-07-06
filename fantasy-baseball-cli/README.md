@@ -20,8 +20,8 @@ python src/main.py [flags]
 
 ## Commands
 
-- `--player <player_name> <season>/<career>`: Retrieve statistics for a specific player for a specific season. If no season is specified, the current season stats is returned by default"
-- `--compare <player_name> <player_name>`: Compare two specific players.
+- `--player <player_name> [--season <year> | --career]`: Retrieve statistics for a specific player for a specific season (use `--season <year>`) or for their career (use `--career`). If neither is specified, current season stats are returned by default.
+- `--compare <player_name> <player_name> [--season <year> | --career]`: Compare two specific players for a given season or for their career. If neither is specified, current season stats are compared by default.
 - `--team <team_name>`: Retrieve statistics for all players on a specific team.
 - `--help`: Show help information about the available commands.
 

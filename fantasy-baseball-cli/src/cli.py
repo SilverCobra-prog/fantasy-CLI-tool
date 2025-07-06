@@ -51,8 +51,13 @@ def main():
             player_id_1 = lookup_player_id(args.compare[0])
             player_id_2 = lookup_player_id(args.compare[1])
             if player_id_1 and player_id_2:
-                comparison = compare_players(player_id_1, player_id_2)
-                print(comparison)
+                comparison = compare_players(
+                    player_id_1,
+                    player_id_2,
+                    season=args.season,
+                    career=args.career
+                )
+                print(comparison)    
     except Exception as e:
         print(f"Error retrieving stats: {e}")
 

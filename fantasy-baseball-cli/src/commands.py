@@ -1,10 +1,17 @@
 import statsapi
 from .utils import fetch_player_stats, parse_stats, lookup_player_name
 
-def compare_players(player_id_1, player_id_2):
-    """Compare two players' statistics and return a side-by-side formatted string."""
-    stats1_str = fetch_player_stats(player_id_1)
-    stats2_str = fetch_player_stats(player_id_2)
+def compare_players(player_id_1, player_id_2, season=None, career=False):
+    """
+    Compare two players' statistics and return a side-by-side formatted string.
+    Optionally compare for a specific season or for career stats.
+    """
+    if career:
+        stats1_str = fetch_player_stats(player_id_1, type="career")
+        stats2_str = fetch_player_stats(player_id_2, type="career")
+    else:
+        stats1_str = fetch_player_stats(player_id_1, season=season)
+        stats2_str = fetch_player_stats(player_id_2, season=season)
 
     if not stats1_str or not stats2_str:
         return "Could not retrieve stats for one or both players."
@@ -23,9 +30,3 @@ def compare_players(player_id_1, player_id_2):
         val2 = stats2.get(key, "-")
         rows.append(f"{key:<20} | {val1:<{len(player1_name)}} | {val2:<{len(player2_name)}}")
     return "\n".join(rows)
-
-def format_stats(stats):
-    """Format the player statistics for display."""
-    if not stats:
-        return "No statistics available."
-    return stats
