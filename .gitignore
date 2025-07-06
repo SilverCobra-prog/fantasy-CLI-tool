@@ -9,4 +9,4 @@ build/
 dist/
 *.sqlite3
 .DS_Store
-fantasy_team.db
+*.db
