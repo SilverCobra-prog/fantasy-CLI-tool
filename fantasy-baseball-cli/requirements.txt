@@ -1,3 +1,3 @@
 statsapi
-click
-requests
+argparse
+sys

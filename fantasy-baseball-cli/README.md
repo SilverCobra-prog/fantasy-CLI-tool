@@ -15,7 +15,7 @@ pip install -r requirements.txt
 To use the Fantasy Baseball CLI, run the following command in your terminal:
 
 ```
-python src/main.py [options]
+python src/main.py [flags]
 ```
 
 ## Commands
