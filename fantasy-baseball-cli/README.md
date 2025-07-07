@@ -23,6 +23,10 @@ python src/main.py [flags]
 - `--player <player_name> [--season <year> | --career]`: Retrieve statistics for a specific player for a specific season (use `--season <year>`) or for their career (use `--career`). If neither is specified, current season stats are returned by default.
 - `--compare <player_name> <player_name> [--season <year> | --career]`: Compare two specific players for a given season or for their career. If neither is specified, current season stats are compared by default.
 - `--team <team_name>`: Retrieve statistics for all players on a specific team.
+- `--fantasy-add <player_name>`: Add a player to your fantasy team.
+- `--fantasy-remove <player_name>`: Remove a player from your fantasy team.
+- `--fantasy-list`: List all players currently on your fantasy team.
+- `--fantasy-stats`: Show combined statistics for your fantasy team.
 - `--help`: Show help information about the available commands.
 
 ## Examples
