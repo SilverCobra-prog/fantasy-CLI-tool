@@ -1,4 +1,3 @@
-import statsapi
 from .utils import fetch_player_stats, parse_stats, lookup_player_name
 
 def compare_players(player_id_1, player_id_2, season=None, career=False):

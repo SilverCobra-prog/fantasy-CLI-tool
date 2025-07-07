@@ -1,4 +1,5 @@
 import requests
+import os 
 
 def lookup_player_id(name):
     """Get a player's name from their MLB player ID."""
@@ -37,7 +38,7 @@ def format_player_stats(player_dict):
                 if isinstance(v, dict):
                     continue
                 lines.append(f"    {k}: {v}")
-            lines.append("")  #
+            lines.append("")  
     return "\n".join(lines)
 
 def fetch_player_stats(player_id, season=None, type="season"):
@@ -80,6 +81,71 @@ def fetch_player_stats(player_id, season=None, type="season"):
         print(f"Error fetching stats for player ID {player_id}: {e}")
         return None    
     
+def lookup_team_id(team_name):
+    """
+    Lookup a team's MLB ID by its name (case-insensitive, supports partial matches).
+    """
+    teams_url = "https://statsapi.mlb.com/api/v1/teams"
+    teams_res = requests.get(teams_url)
+    if teams_res.status_code != 200:
+        print(f"API Error: {teams_res.status_code} - {teams_res.text}")
+        return None
+    teams_data = teams_res.json()
+    team_name_lower = team_name.lower()
+    for team in teams_data.get("teams", []):
+        if (team_name_lower == team["name"].lower() or
+            team_name_lower == team.get("teamName", "").lower() or
+            team_name_lower == team.get("locationName", "").lower() or
+            team_name_lower in team["name"].lower() or
+            team_name_lower in team.get("teamName", "").lower()):
+            return team["id"]
+    print(f"Team '{team_name}' not found.")
+    return None
+
+def format_team_stats(stats):
+    """
+    Nicely format team stats from the /api/v1/teams/{teamId}/stats endpoint.
+    """
+    if not stats:
+        return "No stats available."
+
+    lines = []
+    for stat_group in stats:
+        group_name = stat_group.get('group', {}).get('displayName', '').capitalize()
+        type_name = stat_group.get('type', {}).get('displayName', '').capitalize()
+        lines.append(f"{type_name} {group_name}")
+        for split in stat_group.get('splits', []):
+            stat = split.get('stat', {})
+            for k, v in stat.items():
+                if isinstance(v, dict):
+                    continue
+                lines.append(f"    {k}: {v}")
+            lines.append("")
+    return "\n".join(lines)
+
+
+def fetch_team_stats(team_name, season=None, group="hitting,pitching,fielding", stats_type="season"):
+    """
+    Fetch team stats using /api/v1/teams/{teamId}/stats endpoint.
+    Defaults to season 2025 if not specified.
+    """
+    if not season:
+        season = "2025"
+    team_id = lookup_team_id(team_name)
+    if not team_id:
+        return f"Team '{team_name}' not found."
+    stats_url = f"https://statsapi.mlb.com/api/v1/teams/{team_id}/stats"
+    params = {
+        "stats": stats_type,
+        "group": group,
+        "season": season
+    }
+    stats_res = requests.get(stats_url, params=params)
+    if stats_res.status_code != 200:
+        return f"API Error: {stats_res.status_code} - {stats_res.text}"
+    stats_data = dict(stats_res.json())
+    return print(format_team_stats(stats_data.get("stats", [])))
+
 def parse_stats(stats_str):
     """Parse all key-value pairs in the stats string into a dictionary."""
     lines = stats_str.splitlines()

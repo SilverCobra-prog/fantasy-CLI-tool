@@ -1,5 +1,5 @@
 import argparse
-from .utils import fetch_player_stats, lookup_player_id
+from .utils import fetch_player_stats, lookup_player_id, fetch_team_stats
 from .commands import compare_players
 from .fantasy_db import init_fantasy_db, add_player_to_team, remove_player_from_team, list_fantasy_team
 
@@ -14,6 +14,11 @@ def create_cli_parser():
         '--player',
         type=str,
         help='Get stats of a player by name (e.g., --player "Mike Trout").'
+    )
+    group.add_argument(
+        '--team',
+        type=str,
+        help='Get stats of a player by name (e.g., --team "San Francisco Giants").'
     )
     group.add_argument(
         '--compare',
@@ -66,6 +71,8 @@ def main():
                 else:
                     stats = fetch_player_stats(player_id, season=args.season)
                 print(stats)
+        elif args.team:
+            fetch_team_stats(args.team, season=args.season)
         elif args.compare:
             player_id_1 = lookup_player_id(args.compare[0])
             player_id_2 = lookup_player_id(args.compare[1])
