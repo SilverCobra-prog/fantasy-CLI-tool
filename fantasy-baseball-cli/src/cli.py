@@ -1,7 +1,7 @@
 import argparse
 from .utils import fetch_player_stats, lookup_player_id, fetch_team_stats
-from .commands import compare_players
-from .fantasy_db import init_fantasy_db, add_player_to_team, remove_player_from_team, list_fantasy_team
+from .commands import compare_players, get_player_fantasy_points
+from .fantasy_db import init_fantasy_db, add_player_to_team, remove_player_from_team, list_fantasy_team, print_team_fantasy_scores
 
 def create_cli_parser():
     """Create and return the argument parser for the CLI tool."""
@@ -30,18 +30,30 @@ def create_cli_parser():
         '--fantasy-add',
         nargs=2,
         metavar=('USER', 'PLAYER'),
-        help='Add a player to a user\'s fantasy team (e.g., --fantasy-add sumukh "Mike Trout").'
+        help='Add a player to a user\'s fantasy team (e.g., --fantasy-add my-team "Mike Trout").'
     )
     group.add_argument(
         '--fantasy-remove',
         nargs=2,
         metavar=('USER', 'PLAYER'),
-        help='Remove a player from a user\'s fantasy team (e.g., --fantasy-remove sumukh "Mike Trout").'
+        help='Remove a player from a user\'s fantasy team (e.g., --fantasy-remove my-team "Mike Trout").'
     )
     group.add_argument(
         '--fantasy-list',
         metavar='USER',
-        help='List all players on a user\'s fantasy team (e.g., --fantasy-list sumukh).'
+        help='List all players on a user\'s fantasy team (e.g., --fantasy-list my-team).'
+    )
+    group.add_argument(
+        '--fantasy-score',
+        type=str,
+        metavar='PLAYER',
+        help='Show the fantasy score for a player for a season (e.g., --fantasy-score "Mike Trout" --season 2021).'
+    )
+    group.add_argument(
+        '--fantasy-team-score',
+        type=str,
+        metavar=('USER'),
+        help='Show the fantasy score for all players in a fantasy team for a season (e.g., --fantasy-team-score my-team).'
     )
     stat_group = parser.add_mutually_exclusive_group(required=False)
     stat_group.add_argument(
@@ -84,6 +96,12 @@ def main():
                     career=args.career
                 )
                 print(comparison)
+        elif args.fantasy_score:
+            player_id = lookup_player_id(args.fantasy_score)
+            if player_id:
+                get_player_fantasy_points(player_id, args.season)
+            else:
+                print(f"Player '{args.fantasy_score}' not found.")
         elif args.fantasy_add:
             user, player_name = args.fantasy_add
             player_id = lookup_player_id(player_name)
@@ -107,6 +125,13 @@ def main():
                 print(f"{user}'s fantasy team:")
                 for pid, pname in team:
                     print(f"{pname} (ID: {pid})")
+            else:
+                print(f"{user} has no players on their fantasy team.")
+        elif args.fantasy_team_score:
+            user = args.fantasy_team_score
+            team = list_fantasy_team(user)
+            if team:
+                print_team_fantasy_scores(user)
             else:
                 print(f"{user} has no players on their fantasy team.")
     except Exception as e:

@@ -1,5 +1,4 @@
 import requests
-import os 
 
 def lookup_player_id(name):
     """Get a player's name from their MLB player ID."""
@@ -162,3 +161,107 @@ def handle_api_error(response):
         print(f"API Error: {response.status_code} - {response.text}")
         return False
     return True
+
+
+def calculate_fantasy_score(players_stats):
+    """
+    Calculate the total fantasy score for a player or list of stat dicts using a custom scoring system.
+    Accepts a single dict or a list of dicts.
+    Returns the total fantasy score (float).
+    """
+    scoring = {
+        # Batting
+        "runs": 1,                # R
+        "totalBases": 1,          # TB
+        "rbi": 1,                 # RBI
+        "baseOnBalls": 1,         # BB (walks)
+        "strikeOuts": -1,         # K (batting strikeouts)
+        "stolenBases": 1,         # SB
+        # Pitching
+        "inningsPitched": 3,      # IP
+        "hits": -1,               # H (hits allowed)
+        "earnedRuns": -2,         # ER
+        "holds": 2,               # HD
+        "pitchingBaseOnBalls": -1,# BB (walks issued, pitching)
+        "pitchingStrikeOuts": 1,  # K (pitching strikeouts)
+        "wins": 2,                # W
+        "losses": -2,             # L
+        "saves": 2                # SV
+    }
+
+    if isinstance(players_stats, dict):
+        stats_list = [players_stats]
+    else:
+        stats_list = players_stats
+
+    total = 0.0
+    for stats in stats_list:
+        # Batting
+        total += scoring["runs"] * float(stats.get("runs", 0))
+        total += scoring["totalBases"] * float(stats.get("totalBases", 0))
+        total += scoring["rbi"] * float(stats.get("rbi", 0))
+        total += scoring["baseOnBalls"] * float(stats.get("baseOnBalls", 0))
+        total += scoring["strikeOuts"] * float(stats.get("strikeOuts", 0))
+        total += scoring["stolenBases"] * float(stats.get("stolenBases", 0))
+        # Pitching
+        total += scoring["inningsPitched"] * float(stats.get("inningsPitched", 0))
+        total += scoring["hits"] * float(stats.get("hits", 0))
+        total += scoring["earnedRuns"] * float(stats.get("earnedRuns", 0))
+        total += scoring["holds"] * float(stats.get("holds", 0))
+        # For pitching walks and strikeouts, try to distinguish if possible
+        # If not, use baseOnBalls and strikeOuts for both
+        total += scoring["pitchingBaseOnBalls"] * float(stats.get("baseOnBalls", 0))
+        total += scoring["pitchingStrikeOuts"] * float(stats.get("strikeOuts", 0))
+        total += scoring["wins"] * float(stats.get("wins", 0))
+        total += scoring["losses"] * float(stats.get("losses", 0))
+        total += scoring["saves"] * float(stats.get("saves", 0))
+    return total
+
+def calculate_fantasy_score(players_stats):
+    """
+    Calculate the total fantasy score for a list of player stats dicts using a custom scoring system.
+    Returns the total fantasy score (float).
+    """
+    # Scoring system
+    scoring = {
+        # Batting
+        "runs": 1,                # R
+        "totalBases": 1,          # TB
+        "rbi": 1,                 # RBI
+        "baseOnBalls": 1,         # BB 
+        "strikeOuts": -1,         # K 
+        "stolenBases": 1,         # SB
+        # Pitching
+        "inningsPitched": 3,      # IP
+        "hits": -1,               # H 
+        "earnedRuns": -2,         # ER
+        "holds": 2,               # HD
+        "pitchingBaseOnBalls": -1,# BB 
+        "pitchingStrikeOuts": 1,  # K
+        "wins": 2,                # W
+        "losses": -2,             # L
+        "saves": 2                # SV
+    }
+
+    total = 0.0
+    for stats in players_stats:
+        # Batting
+        total += scoring["runs"] * float(stats.get("runs", 0))
+        total += scoring["totalBases"] * float(stats.get("totalBases", 0))
+        total += scoring["rbi"] * float(stats.get("rbi", 0))
+        total += scoring["baseOnBalls"] * float(stats.get("baseOnBalls", 0))
+        total += scoring["strikeOuts"] * float(stats.get("strikeOuts", 0))
+        total += scoring["stolenBases"] * float(stats.get("stolenBases", 0))
+        # Pitching
+        total += scoring["inningsPitched"] * float(stats.get("inningsPitched", 0))
+        total += scoring["hits"] * float(stats.get("hits", 0))
+        total += scoring["earnedRuns"] * float(stats.get("earnedRuns", 0))
+        total += scoring["holds"] * float(stats.get("holds", 0))
+        # For pitching walks and strikeouts, try to distinguish if possible
+        # If not, use baseOnBalls and strikeOuts for both
+        total += scoring["pitchingBaseOnBalls"] * float(stats.get("baseOnBalls", 0))
+        total += scoring["pitchingStrikeOuts"] * float(stats.get("strikeOuts", 0))
+        total += scoring["wins"] * float(stats.get("wins", 0))
+        total += scoring["losses"] * float(stats.get("losses", 0))
+        total += scoring["saves"] * float(stats.get("saves", 0))
+    return total

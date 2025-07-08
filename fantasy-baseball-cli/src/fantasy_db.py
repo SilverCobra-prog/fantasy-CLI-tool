@@ -1,4 +1,5 @@
 import sqlite3
+from .commands import get_player_fantasy_points
 
 FANTASY_DB_PATH = "fantasy_team.db"
 
@@ -45,19 +46,20 @@ def list_fantasy_team(user, db_path=FANTASY_DB_PATH):
     conn.close()
     return players
 
-# Example usage:
-if __name__ == "__main__":
-    init_fantasy_db()
-    user = "sumukh"
-    # Add a player
-    add_player_to_team(user, 545361, "Mike Trout")
-    add_player_to_team(user, 111188, "Barry Bonds")
-    # List team
-    print(f"{user}'s fantasy team:")
-    for pid, pname in list_fantasy_team(user):
-        print(f"{pname} (ID: {pid})")
-    # Remove a player
-    remove_player_from_team(user, 545361)
-    print(f"\nAfter removal, {user}'s fantasy team:")
-    for pid, pname in list_fantasy_team(user):
-        print(f"{pname} (ID: {pid})")
+def print_team_fantasy_scores(user, db_path=FANTASY_DB_PATH):
+    team = list_fantasy_team(user, db_path=db_path)
+    if not team:
+        print(f"No players found for user '{user}'.")
+        return
+
+    total_score = 0
+    print(f"Fantasy Team: {user}:\n{'-'*40}")
+    for player_id, player_name in team:
+        try:
+            score = get_player_fantasy_points(player_id)
+        except Exception as e:
+            print(f"Error fetching score for {player_name} (ID {player_id}): {e}")
+            continue
+        total_score += score
+    print('-'*40)
+    print(f"Season Fantasy Score: {total_score}")
