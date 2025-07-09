@@ -10,3 +10,6 @@ dist/
 *.sqlite3
 .DS_Store
 *.db
+dist/
+build/
+fantasy_baseball_cli.egg-info/
