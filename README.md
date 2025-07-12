@@ -19,7 +19,7 @@ pip install .
 Or via PyPI with:
 
 ```
-pip install fantasy-baseball-cli
+pip install baseball-cli
 ```
 
 ## Usage
@@ -34,7 +34,8 @@ fantasy-baseball [flags]
 
 - `--player <player_name> [--season <year> | --career]`: Retrieve statistics for a specific player for a specific season (use `--season <year>`) or for their career (use `--career`). If neither is specified, current season stats are returned by default.
 - `--compare <player_name> <player_name> [--season <year> | --career]`: Compare two specific players for a given season or for their career. If neither is specified, current season stats are compared by default.
-- `--team <team_name>`: Retrieve statistics for all players on a specific team.
+- `--roster <-team_name>`: Retrieve names for all players on a specific team.
+- `--team <team_name>`: Retrieve season statistics for a specific team.
 - `--fantasy-score <player_name> --season <year>`: Show fantasy statistics for a specific player for a specific season.
 - `--fantasy-add <player_name>`: Add a player to your fantasy team.
 - `--fantasy-remove <player_name>`: Remove a player from your fantasy team.
@@ -47,13 +48,13 @@ fantasy-baseball [flags]
 1. Retrieve statistics for a specific player:
 
 ```
-fantasy-baseball --player "Mike Trout"
+baseball-cli --player "Mike Trout"
 ```
 
 2. Retrieve statistics for a specific team:
 
 ```
-fantasy-baseball --team "Los Angeles Angels"
+baseball-cli --team "Los Angeles Angels"
 ```
 
 ## Contributing
