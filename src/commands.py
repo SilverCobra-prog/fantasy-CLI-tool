@@ -37,7 +37,7 @@ def get_player_fantasy_points(player_id, season=None):
     params = {
         "hydrate": f"stats(group=[hitting,pitching,fielding],type=season,season={season_used})"
     }
-    res = requests.get(url, params=params)
+    res = requests.get(url, params=params, timeout=120)
     if res.status_code == 200:
         data = res.json()
         if "people" in data and data["people"]:

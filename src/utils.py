@@ -4,18 +4,18 @@ def lookup_player_id(name):
     """Get a player's name from their MLB player ID."""
     url = "https://statsapi.mlb.com/api/v1/people/search"
     params = {"names": [name]} 
-    res = requests.get(url, params=params)
+    res = requests.get(url, params=params, timeout=120)
     data = res.json()
     if "people" in data and data["people"]:
         return data["people"][0]["id"]
     return None
 
 
-def lookup_player_name(id):
+def lookup_player_name(player_id):
     """Get a player's MLB player ID from their name."""
     url = "https://statsapi.mlb.com/api/v1/people/search"
-    params = {"personIds": [id]} 
-    res = requests.get(url, params=params)
+    params = {"personIds": [player_id]} 
+    res = requests.get(url, params=params, timeout=120)
     data = res.json()
     if "people" in data and data["people"]:
         return data["people"][0]["fullName"]
@@ -40,7 +40,7 @@ def format_player_stats(player_dict):
             lines.append("")  
     return "\n".join(lines)
 
-def fetch_player_stats(player_id, season=None, type="season"):
+def fetch_player_stats(player_id, season=None):
     """
     Fetch player statistics for a specific season or career.
     Returns a formatted string for career, or a formatted dict for a specific season.
@@ -52,7 +52,7 @@ def fetch_player_stats(player_id, season=None, type="season"):
                 "hydrate": f"stats(group=[hitting,pitching,fielding],type=season,season={season})",
                 "season": season
             }
-            res = requests.get(url, params=params)
+            res = requests.get(url, params=params, timeout=120)
             if res.status_code != 200:
                 print(f"API Error: {res.status_code} - {res.text}")
                 return None
@@ -67,7 +67,7 @@ def fetch_player_stats(player_id, season=None, type="season"):
             params = {
                 "hydrate": "stats(group=[hitting,pitching,fielding],type=career)"
             }
-            res = requests.get(url, params=params)
+            res = requests.get(url, params=params, timeout=120)
             if res.status_code != 200:
                 print(f"API Error: {res.status_code} - {res.text}")
                 return None
@@ -76,7 +76,7 @@ def fetch_player_stats(player_id, season=None, type="season"):
                 return format_player_stats(data["people"][0])
             else:
                 print("No player data found.")
-    except Exception as e:
+    except requests.exceptions.RequestException as e:
         print(f"Error fetching stats for player ID {player_id}: {e}")
         return None    
     
@@ -85,7 +85,7 @@ def lookup_team_id(team_name):
     Lookup a team's MLB ID by its name (case-insensitive, supports partial matches).
     """
     teams_url = "https://statsapi.mlb.com/api/v1/teams"
-    teams_res = requests.get(teams_url)
+    teams_res = requests.get(teams_url, timeout=120)
     if teams_res.status_code != 200:
         print(f"API Error: {teams_res.status_code} - {teams_res.text}")
         return None
@@ -139,7 +139,7 @@ def fetch_team_stats(team_name, season=None, group="hitting,pitching,fielding", 
         "group": group,
         "season": season
     }
-    stats_res = requests.get(stats_url, params=params)
+    stats_res = requests.get(stats_url, params=params, timeout=120)
     if stats_res.status_code != 200:
         return f"API Error: {stats_res.status_code} - {stats_res.text}"
     stats_data = dict(stats_res.json())
@@ -228,12 +228,12 @@ def fetch_team_roster(team_id, season=None):
     url = f"https://statsapi.mlb.com/api/v1/teams/{team_id}/roster"
     params = {"season": season}
     try:
-        res = requests.get(url, params=params)
+        res = requests.get(url, params=params, timeout=120)
         if res.status_code != 200:
             print(f"API Error: {res.status_code} - {res.text}")
             return None
         data = res.json()
         return data.get("roster", [])
-    except Exception as e:
+    except requests.exceptions.RequestException as e:
         print(f"Error fetching roster for team {team_id} in season {season}: {e}")
         return

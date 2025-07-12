@@ -150,8 +150,10 @@ def main():
                     print(f"{player['person']['fullName']} ({player['jerseyNumber']}) - {player['position']['abbreviation']}")
             else:
                 print(f"No roster found for team {team_id} in {season}.")
-    except Exception as e:
-        print(f"Error: {e}")
+    except argparse.ArgumentError as e:
+        print(f"Argument error: {e}")
+    except KeyError as e:
+        print(f"Key error: {e}")
 
 if __name__ == "__main__":
     main()
