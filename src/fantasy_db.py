@@ -1,5 +1,5 @@
 import sqlite3
-from .commands import get_player_fantasy_points
+from src.commands import get_player_fantasy_points
 
 FANTASY_DB_PATH = "fantasy_team.db"
 

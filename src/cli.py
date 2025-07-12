@@ -1,7 +1,7 @@
 import argparse
-from .utils import fetch_player_stats, lookup_player_id, fetch_team_stats
-from .commands import compare_players, get_player_fantasy_points
-from .fantasy_db import init_fantasy_db, add_player_to_team, remove_player_from_team, list_fantasy_team, print_team_fantasy_scores
+from src.utils import fetch_player_stats, lookup_player_id, fetch_team_stats, fetch_team_roster
+from src.commands import compare_players, get_player_fantasy_points
+from src.fantasy_db import init_fantasy_db, add_player_to_team, remove_player_from_team, list_fantasy_team, print_team_fantasy_scores
 
 def create_cli_parser():
     """Create and return the argument parser for the CLI tool."""
@@ -54,6 +54,12 @@ def create_cli_parser():
         type=str,
         metavar=('USER'),
         help='Show the fantasy score for all players in a fantasy team for a season (e.g., --fantasy-team-score my-team).'
+    )
+    group.add_argument(
+        '--roster',
+        nargs=2,
+        metavar=('TEAM_ID', 'SEASON'),
+        help='Fetch the roster for a team by team ID and season (e.g., --roster 119 2024).'
     )
     stat_group = parser.add_mutually_exclusive_group(required=False)
     stat_group.add_argument(
@@ -134,6 +140,15 @@ def main():
                 print_team_fantasy_scores(user)
             else:
                 print(f"{user} has no players on their fantasy team.")
+        elif args.roster:
+            team_id, season = args.roster
+            roster = fetch_team_roster(team_id, season)
+            if roster:
+                print(f"Roster for team {team_id} in {season}:")
+                for player in roster:
+                    print(f"{player['person']['fullName']} ({player['jerseyNumber']}) - {player['position']['abbreviation']}")
+            else:
+                print(f"No roster found for team {team_id} in {season}.")
     except Exception as e:
         print(f"Error: {e}")
 

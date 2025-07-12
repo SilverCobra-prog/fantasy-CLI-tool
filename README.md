@@ -10,12 +10,24 @@ To install the required dependencies, run:
 pip install -r requirements.txt
 ```
 
+You can install the CLI directly from the repository using pip:
+
+```
+pip install .
+```
+
+Or via PyPI with:
+
+```
+pip install fantasy-baseball-cli
+```
+
 ## Usage
 
 To use the Fantasy Baseball CLI, run the following command in your terminal:
 
 ```
-python src/main.py [flags]
+fantasy-baseball [flags]
 ```
 
 ## Commands
@@ -35,13 +47,13 @@ python src/main.py [flags]
 1. Retrieve statistics for a specific player:
 
 ```
-python src/main.py --player "Mike Trout"
+fantasy-baseball --player "Mike Trout"
 ```
 
 2. Retrieve statistics for a specific team:
 
 ```
-python src/main.py --team "Los Angeles Angels"
+fantasy-baseball --team "Los Angeles Angels"
 ```
 
 ## Contributing

@@ -216,3 +216,21 @@ def calculate_fantasy_score(players_stats):
         total += scoring["losses"] * float(stats.get("losses", 0))
         total += scoring["saves"] * float(stats.get("saves", 0))
     return total
+
+def fetch_team_roster(team_id, season):
+    """
+    Fetch the roster for a specific team and season using the MLB StatsAPI.
+    Returns a list of player dictionaries or None if not found.
+    """
+    url = f"https://statsapi.mlb.com/api/v1/teams/{team_id}/roster"
+    params = {"season": season}
+    try:
+        res = requests.get(url, params=params)
+        if res.status_code != 200:
+            print(f"API Error: {res.status_code} - {res.text}")
+            return None
+        data = res.json()
+        return data.get("roster", [])
+    except Exception as e:
+        print(f"Error fetching roster for team {team_id} in season {season}: {e}")
+        return None

@@ -12,4 +12,4 @@ dist/
 *.db
 dist/
 build/
-fantasy_baseball_cli.egg-info/
+baseball_cli.egg-info/
