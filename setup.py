@@ -11,7 +11,7 @@ setup(
     packages=find_packages(),
     author='Sumukh Venkatesh',
     description='A command-line interface tool for analyzing baseball stats and fantasy baseball teams.',
-    long_description=open('README.md').read(),
+    long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
     url='https://github.com/SilverCobra-prog/fantasy-CLI',
     classifiers=[
