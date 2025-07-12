@@ -1,5 +1,5 @@
 import argparse
-from src.utils import fetch_player_stats, lookup_player_id, fetch_team_stats, fetch_team_roster
+from src.utils import fetch_player_stats, lookup_player_id, fetch_team_stats, fetch_team_roster, lookup_team_id
 from src.commands import compare_players, get_player_fantasy_points
 from src.fantasy_db import init_fantasy_db, add_player_to_team, remove_player_from_team, list_fantasy_team, print_team_fantasy_scores
 
@@ -57,9 +57,9 @@ def create_cli_parser():
     )
     group.add_argument(
         '--roster',
-        nargs=2,
-        metavar=('TEAM_ID', 'SEASON'),
-        help='Fetch the roster for a team by team ID and season (e.g., --roster 119 2024).'
+        type=str,
+        metavar=('TEAM_NAME'),
+        help='Fetch the roster for a team by team ID and season (e.g., --roster "Los Angeles Dodgers").'
     )
     stat_group = parser.add_mutually_exclusive_group(required=False)
     stat_group.add_argument(
@@ -141,10 +141,11 @@ def main():
             else:
                 print(f"{user} has no players on their fantasy team.")
         elif args.roster:
-            team_id, season = args.roster
+            team_id = lookup_team_id(args.roster)
+            season = args.season if args.season else "2025"
             roster = fetch_team_roster(team_id, season)
             if roster:
-                print(f"Roster for team {team_id} in {season}:")
+                print(f"Roster for team {args.roster} in {season}:")
                 for player in roster:
                     print(f"{player['person']['fullName']} ({player['jerseyNumber']}) - {player['position']['abbreviation']}")
             else:
