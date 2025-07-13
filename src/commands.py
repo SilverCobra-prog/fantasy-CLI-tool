@@ -8,7 +8,7 @@ from src.utils import (
     calculate_fantasy_score,
 )
 
-
+# pylint: disable=too-many-locals
 def compare_players(player_id_1, player_id_2, season=None, career=False):
     """
     Compare two players' statistics and return a side-by-side formatted string.

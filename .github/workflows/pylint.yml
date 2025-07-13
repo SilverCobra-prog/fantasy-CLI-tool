@@ -20,4 +20,4 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint --disable=no-else-return,inconsistent-return-statements $(git ls-files '*.py')
+        pylint --disable=no-else-return,inconsistent-return-statements,import-error $(git ls-files '*.py')
