@@ -1,9 +1,12 @@
+"""Utility functions for the Fantasy Baseball CLI, including API calls, formatting, and scoring."""
+
 import requests
+
 
 def lookup_player_id(name):
     """Get a player's name from their MLB player ID."""
     url = "https://statsapi.mlb.com/api/v1/people/search"
-    params = {"names": [name]} 
+    params = {"names": [name]}
     res = requests.get(url, params=params, timeout=120)
     data = res.json()
     if "people" in data and data["people"]:
@@ -14,31 +17,35 @@ def lookup_player_id(name):
 def lookup_player_name(player_id):
     """Get a player's MLB player ID from their name."""
     url = "https://statsapi.mlb.com/api/v1/people/search"
-    params = {"personIds": [player_id]} 
+    params = {"personIds": [player_id]}
     res = requests.get(url, params=params, timeout=120)
     data = res.json()
     if "people" in data and data["people"]:
         return data["people"][0]["fullName"]
     return None
 
+
 def format_player_stats(player_dict):
     """Nicely format player stats."""
     lines = []
-    lines.append(f"{player_dict['fullName']} ({player_dict['primaryPosition']['name']})")
+    lines.append(
+        f"{player_dict['fullName']} ({player_dict['primaryPosition']['name']})"
+    )
     lines.append("")
 
-    for stat_group in player_dict.get('stats', []):
-        group_name = stat_group['group']['displayName'].capitalize()
-        type_name = stat_group['type']['displayName'].capitalize()
+    for stat_group in player_dict.get("stats", []):
+        group_name = stat_group["group"]["displayName"].capitalize()
+        type_name = stat_group["type"]["displayName"].capitalize()
         lines.append(f"{type_name} {group_name}")
-        for split in stat_group.get('splits', []):
-            stat = split.get('stat', {})
+        for split in stat_group.get("splits", []):
+            stat = split.get("stat", {})
             for k, v in stat.items():
                 if isinstance(v, dict):
                     continue
                 lines.append(f"    {k}: {v}")
-            lines.append("")  
+            lines.append("")
     return "\n".join(lines)
+
 
 def fetch_player_stats(player_id, season=None):
     """
@@ -50,7 +57,7 @@ def fetch_player_stats(player_id, season=None):
             url = f"https://statsapi.mlb.com/api/v1/people/{player_id}"
             params = {
                 "hydrate": f"stats(group=[hitting,pitching,fielding],type=season,season={season})",
-                "season": season
+                "season": season,
             }
             res = requests.get(url, params=params, timeout=120)
             if res.status_code != 200:
@@ -64,9 +71,7 @@ def fetch_player_stats(player_id, season=None):
                 return None
         else:
             url = f"https://statsapi.mlb.com/api/v1/people/{player_id}"
-            params = {
-                "hydrate": "stats(group=[hitting,pitching,fielding],type=career)"
-            }
+            params = {"hydrate": "stats(group=[hitting,pitching,fielding],type=career)"}
             res = requests.get(url, params=params, timeout=120)
             if res.status_code != 200:
                 print(f"API Error: {res.status_code} - {res.text}")
@@ -78,8 +83,9 @@ def fetch_player_stats(player_id, season=None):
                 print("No player data found.")
     except requests.exceptions.RequestException as e:
         print(f"Error fetching stats for player ID {player_id}: {e}")
-        return None    
-    
+        return None
+
+
 def lookup_team_id(team_name):
     """
     Lookup a team's MLB ID by its name (case-insensitive, supports partial matches).
@@ -92,14 +98,17 @@ def lookup_team_id(team_name):
     teams_data = teams_res.json()
     team_name_lower = team_name.lower()
     for team in teams_data.get("teams", []):
-        if (team_name_lower == team["name"].lower() or
-            team_name_lower == team.get("teamName", "").lower() or
-            team_name_lower == team.get("locationName", "").lower() or
-            team_name_lower in team["name"].lower() or
-            team_name_lower in team.get("teamName", "").lower()):
+        if (
+            team_name_lower == team["name"].lower()
+            or team_name_lower == team.get("teamName", "").lower()
+            or team_name_lower == team.get("locationName", "").lower()
+            or team_name_lower in team["name"].lower()
+            or team_name_lower in team.get("teamName", "").lower()
+        ):
             return team["id"]
     print(f"Team '{team_name}' not found.")
     return None
+
 
 def format_team_stats(stats):
     """
@@ -110,11 +119,11 @@ def format_team_stats(stats):
 
     lines = []
     for stat_group in stats:
-        group_name = stat_group.get('group', {}).get('displayName', '').capitalize()
-        type_name = stat_group.get('type', {}).get('displayName', '').capitalize()
+        group_name = stat_group.get("group", {}).get("displayName", "").capitalize()
+        type_name = stat_group.get("type", {}).get("displayName", "").capitalize()
         lines.append(f"{type_name} {group_name}")
-        for split in stat_group.get('splits', []):
-            stat = split.get('stat', {})
+        for split in stat_group.get("splits", []):
+            stat = split.get("stat", {})
             for k, v in stat.items():
                 if isinstance(v, dict):
                     continue
@@ -123,7 +132,9 @@ def format_team_stats(stats):
     return "\n".join(lines)
 
 
-def fetch_team_stats(team_name, season=None, group="hitting,pitching,fielding", stats_type="season"):
+def fetch_team_stats(
+    team_name, season=None, group="hitting,pitching,fielding", stats_type="season"
+):
     """
     Fetch team stats using /api/v1/teams/{teamId}/stats endpoint.
     Defaults to season 2025 if not specified.
@@ -134,16 +145,13 @@ def fetch_team_stats(team_name, season=None, group="hitting,pitching,fielding", 
     if not team_id:
         return f"Team '{team_name}' not found."
     stats_url = f"https://statsapi.mlb.com/api/v1/teams/{team_id}/stats"
-    params = {
-        "stats": stats_type,
-        "group": group,
-        "season": season
-    }
+    params = {"stats": stats_type, "group": group, "season": season}
     stats_res = requests.get(stats_url, params=params, timeout=120)
     if stats_res.status_code != 200:
         return f"API Error: {stats_res.status_code} - {stats_res.text}"
     stats_data = dict(stats_res.json())
     return print(format_team_stats(stats_data.get("stats", [])))
+
 
 def parse_stats(stats_str):
     """Parse all key-value pairs in the stats string into a dictionary."""
@@ -155,6 +163,7 @@ def parse_stats(stats_str):
             stats[key.strip()] = value.strip()
     return stats
 
+
 def handle_api_error(response):
     """Handle errors from the API response."""
     if response.status_code != 200:
@@ -165,28 +174,28 @@ def handle_api_error(response):
 
 def calculate_fantasy_score(players_stats):
     """
-    Calculate the total fantasy score for a player or list of stat dicts using a custom scoring system.
+    Calculate the total fantasy score for a using a custom fantasy scoring system.
     Accepts a single dict or a list of dicts.
     Returns the total fantasy score (float).
     """
     scoring = {
         # Batting
-        "runs": 1,                # R
-        "totalBases": 1,          # TB
-        "rbi": 1,                 # RBI
-        "baseOnBalls": 1,         # BB
-        "strikeOuts": -1,         # K 
-        "stolenBases": 1,         # SB
+        "runs": 1,  # R
+        "totalBases": 1,  # TB
+        "rbi": 1,  # RBI
+        "baseOnBalls": 1,  # BB
+        "strikeOuts": -1,  # K
+        "stolenBases": 1,  # SB
         # Pitching
-        "inningsPitched": 3,      # IP
-        "hits": -1,               # H
-        "earnedRuns": -2,         # ER
-        "holds": 2,               # HD
-        "pitchingBaseOnBalls": -1,# BB 
-        "pitchingStrikeOuts": 1,  # K 
-        "wins": 2,                # W
-        "losses": -2,             # L
-        "saves": 2                # SV
+        "inningsPitched": 3,  # IP
+        "hits": -1,  # H
+        "earnedRuns": -2,  # ER
+        "holds": 2,  # HD
+        "pitchingBaseOnBalls": -1,  # BB
+        "pitchingStrikeOuts": 1,  # K
+        "wins": 2,  # W
+        "losses": -2,  # L
+        "saves": 2,  # SV
     }
 
     if isinstance(players_stats, dict):
@@ -216,6 +225,7 @@ def calculate_fantasy_score(players_stats):
         total += scoring["losses"] * float(stats.get("losses", 0))
         total += scoring["saves"] * float(stats.get("saves", 0))
     return total
+
 
 def fetch_team_roster(team_id, season=None):
     """
